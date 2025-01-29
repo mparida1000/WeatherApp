@@ -61,7 +61,13 @@ public class WeatherCSVGenerator {
     }
 
     private static void writeCSV(String city, double temp, double pressure, double humidity, double windSpeed) {
-        String csvFile = System.getProperty("user.home") + "/Desktop/weather_data.csv";
+        String workspaceDir = System.getenv("WORKSPACE");  // Get Jenkins workspace
+        if (workspaceDir == null) {
+            workspaceDir = ".";  // Default to current directory if WORKSPACE is not set
+        }
+        System.out.println(workspaceDir);
+        String csvFile = workspaceDir + "/weather_data"+CITY+System.currentTimeMillis()+".csv";
+        System.out.println(csvFile);
         try (FileWriter writer = new FileWriter(csvFile)) {
             writer.append("City,Temperature (°C),Pressure (hPa),Humidity (%),Wind Speed (m/s)\n");
             writer.append(city).append(",")
