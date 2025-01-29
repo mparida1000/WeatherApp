@@ -13,7 +13,7 @@ pipeline {
         }
         stage('Run Java Program') {
             steps {
-                sh 'java -cp target/weatherapp-1.0-SNAPSHOT.jar com.example.WeatherCSVGenerator'
+                sh 'java -cp target/classes com.example.WeatherCSVGenerator'
             }
         }
         stage('Archive CSV') {
