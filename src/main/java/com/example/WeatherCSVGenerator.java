@@ -66,7 +66,8 @@ public class WeatherCSVGenerator {
             workspaceDir = ".";  // Default to current directory if WORKSPACE is not set
         }
         System.out.println(workspaceDir);
-        String csvFile = workspaceDir + "/weather_data"+CITY+System.currentTimeMillis()+".csv";
+        //String csvFile = workspaceDir + "/weather_data"+CITY+System.currentTimeMillis()+".csv";
+        String csvFile = workspaceDir + "/weather_data.csv";
         System.out.println(csvFile);
         try (FileWriter writer = new FileWriter(csvFile)) {
             writer.append("City,Temperature (°C),Pressure (hPa),Humidity (%),Wind Speed (m/s)\n");
