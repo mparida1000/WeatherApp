@@ -1,21 +1,34 @@
 package com.example;
 
+
+
 import java.io.FileWriter;
 import java.io.IOException;
 import java.net.HttpURLConnection;
+import java.net.URLEncoder;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.Random;
 import java.util.Scanner;
 import org.json.JSONObject;
 
 public class WeatherCSVGenerator {
-    private static final String API_KEY = "ade48d6ddee0fcf184d25c174766e12f";  // Replace with OpenWeatherMap API key
-    private static final String CITY = "Bangalore";  // Change city as needed
-    private static final String BASE_URL = "https://api.openweathermap.org/data/2.5/weather?q=" + CITY + "&appid=" + API_KEY + "&units=metric";
+    private static final String API_KEY = "ade48d6ddee0fcf184d25c174766e12f";  // Replace with your OpenWeatherMap API key
 
     public static void main(String[] args) {
+        if (args.length == 0) {
+            System.out.println("Error: No city provided. Usage: java WeatherCSVGenerator <city_name>");
+            return;
+        }
+
+        String city = args[0];  // Get city from command-line argument
+        System.out.println("Fetching weather data for: " + city);
+
         try {
-            String jsonResponse = getWeatherData(BASE_URL);
+            String encodedCity = URLEncoder.encode(city, StandardCharsets.UTF_8.toString());  // Encode for URL
+            String apiUrl = "https://api.openweathermap.org/data/2.5/weather?q=" + encodedCity + "&appid=" + API_KEY + "&units=metric";
+            String jsonResponse = getWeatherData(apiUrl);
+
             if (jsonResponse != null) {
                 JSONObject jsonObject = new JSONObject(jsonResponse);
                 String cityName = jsonObject.getString("name");
@@ -27,7 +40,7 @@ public class WeatherCSVGenerator {
                 double windSpeed = wind.getDouble("speed");
 
                 writeCSV(cityName, temperature, pressure, humidity, windSpeed);
-                System.out.println("Weather data saved to weather_data.csv");
+                System.out.println("Weather data saved to CSV.");
             } else {
                 System.out.println("Failed to fetch weather data.");
             }
@@ -66,12 +79,12 @@ public class WeatherCSVGenerator {
         if (workspaceDir == null) {
             workspaceDir = ".";  // Default to current directory if WORKSPACE is not set
         }
-        System.out.println(workspaceDir);
+
         Random rand = new Random();
-        int rand_int1 = rand.nextInt(1000);
-        String csvFile = workspaceDir + "/weather_data"+CITY+rand_int1+".csv";
-        //String csvFile = workspaceDir + "/weather_data.csv";
-        System.out.println(csvFile);
+        int randInt = rand.nextInt(1000);  // Generate a random number for unique filename
+        String csvFile = workspaceDir + "/weather_data_" + city.replaceAll(" ", "_") + "_" + randInt + ".csv";
+
+        System.out.println("Saving CSV at: " + csvFile);
         try (FileWriter writer = new FileWriter(csvFile)) {
             writer.append("City,Temperature (°C),Pressure (hPa),Humidity (%),Wind Speed (m/s)\n");
             writer.append(city).append(",")
@@ -86,4 +99,3 @@ public class WeatherCSVGenerator {
         }
     }
 }
-

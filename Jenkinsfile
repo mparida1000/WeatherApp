@@ -1,6 +1,9 @@
 pipeline {
     agent any
     stages {
+        parameters {
+            string(name: 'CITY_NAME', defaultValue: 'London', description: 'Enter the city name')
+        }
         stage('Checkout') {
             steps {
                 git 'https://github.com/mparida1000/WeatherApp.git'
