@@ -16,11 +16,11 @@ pipeline {
                 sh 'find target/classes -name "*.class"'
             }
         }
-        /*stage('Run Java Program') {
+        stage('Run Java Program') {
             steps {
-                sh 'java -cp target/classes com.example.WeatherCSVGenerator'
+                sh 'mvn exec:java -Dexec.mainClass="com.example.WeatherCSVGenerator"'
             }
-        }*/
+        }
 
         /*stage('Archive CSV') {
             steps {
