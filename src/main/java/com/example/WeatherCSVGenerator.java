@@ -4,6 +4,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Random;
 import java.util.Scanner;
 import org.json.JSONObject;
 
@@ -66,8 +67,10 @@ public class WeatherCSVGenerator {
             workspaceDir = ".";  // Default to current directory if WORKSPACE is not set
         }
         System.out.println(workspaceDir);
-        //String csvFile = workspaceDir + "/weather_data"+CITY+System.currentTimeMillis()+".csv";
-        String csvFile = workspaceDir + "/weather_data.csv";
+        Random rand = new Random();
+        int rand_int1 = rand.nextInt(1000);
+        String csvFile = workspaceDir + "/weather_data"+CITY+rand_int1+".csv";
+        //String csvFile = workspaceDir + "/weather_data.csv";
         System.out.println(csvFile);
         try (FileWriter writer = new FileWriter(csvFile)) {
             writer.append("City,Temperature (°C),Pressure (hPa),Humidity (%),Wind Speed (m/s)\n");
