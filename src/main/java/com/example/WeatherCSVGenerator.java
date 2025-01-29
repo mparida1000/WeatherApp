@@ -83,7 +83,8 @@ public class WeatherCSVGenerator {
         Random rand = new Random();
         int randInt = rand.nextInt(1000);  // Generate a random number for unique filename
         //String csvFile = workspaceDir + "/weather_data_" + city.replaceAll(" ", "_") + "_" + randInt + ".csv";
-        String csvFile = workspaceDir + "/weather_data_" + city + ".csv";
+        //String csvFile = workspaceDir + "/weather_data_" + city + ".csv";
+        String csvFile = workspaceDir + "/weather_data.csv";
 
         System.out.println("Saving CSV at: " + csvFile);
         try (FileWriter writer = new FileWriter(csvFile)) {

@@ -25,10 +25,10 @@ pipeline {
             }
         }
 
-        /* stage('Archive CSV') {
+        stage('Archive CSV') {
             steps {
                 archiveArtifacts artifacts: 'weather_data.csv', fingerprint: true
             }
-        } */
+        }
     }
 }
