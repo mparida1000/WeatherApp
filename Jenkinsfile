@@ -3,7 +3,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git 'https://github.com/yourusername/WeatherApp.git'
+                git 'https://github.com/mparida1000/WeatherApp.git'
             }
         }
         stage('Build') {
