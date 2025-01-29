@@ -8,7 +8,7 @@ pipeline {
         }
         stage('Build') {
             steps {
-                sh '/usr/bin/mvn clean install'  // Adjust path if needed
+                sh 'mvn clean install' // Adjust path if needed
             }
         }
         stage('Run Java Program') {
@@ -16,10 +16,15 @@ pipeline {
                 sh 'java -cp target/classes com.example.WeatherCSVGenerator'
             }
         }
-        stage('Archive CSV') {
+        stage('Check Class Files') {
+            steps {
+                sh 'find target/classes -name "*.class"'
+            }
+        }
+        /*stage('Archive CSV') {
             steps {
                 archiveArtifacts artifacts: 'weather_data.csv', fingerprint: true
             }
-        }
+        }*/
     }
 }
