@@ -13,16 +13,9 @@ pipeline {
              stage('Parse JSON Input') {
                          steps {
                              script {
-                                 // Get raw input JSON from the build cause
-                                 def buildCauses = currentBuild.rawBuild.getCauses()
-                                 def jsonString = null
-
-                                 // Extract JSON string from the API call
-                                 buildCauses.each { cause ->
-                                     if (cause.shortDescription.contains("Started by remote host")) {
-                                         jsonString = cause.upstreamParameters?.get("parameter")
-                                     }
-                                 }
+                                 // Retrieve the JSON payload from build parameters
+                                 def buildParameters = currentBuild.getBuildCauses('hudson.model.Cause$UserIdCause')
+                                 def jsonString = buildParameters?.get(0)?.shortDescription
 
                                  // Debugging: Print received JSON
                                  echo "Received JSON: ${jsonString}"
