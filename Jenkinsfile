@@ -7,59 +7,66 @@ pipeline {
             BRANCH = ''
             SUITES = ''
         }
-parameters {
-        text(name: 'JSON_INPUT', defaultValue: '{"parameter":[]}', description: 'JSON Payload for Parameters')
-    }
     stages {
 
 
-   stage('Parse JSON Input') {
-               steps {
-                   script {
-                       // Debug: Print received JSON
-                       echo "Received JSON_INPUT: ${params.JSON_INPUT}"
+             stage('Parse JSON Input') {
+                         steps {
+                             script {
+                                 // Get raw input JSON from the build cause
+                                 def buildCauses = currentBuild.rawBuild.getCauses()
+                                 def jsonString = null
 
-                       // Ensure JSON_INPUT is not empty
-                       if (!params.JSON_INPUT?.trim()) {
-                           error "JSON_INPUT parameter is missing or empty!"
-                       }
+                                 // Extract JSON string from the API call
+                                 buildCauses.each { cause ->
+                                     if (cause.shortDescription.contains("Started by remote host")) {
+                                         jsonString = cause.upstreamParameters?.get("parameter")
+                                     }
+                                 }
 
-                       // Parse the JSON input
-                       def jsonSlurper = new JsonSlurper()
-                       def requestBody = jsonSlurper.parseText(params.JSON_INPUT)
+                                 // Debugging: Print received JSON
+                                 echo "Received JSON: ${jsonString}"
 
-                       // Validate JSON structure
-                       if (!requestBody.containsKey('parameter') || !(requestBody.parameter instanceof List)) {
-                           error "Invalid JSON structure: Missing 'parameter' array"
-                       }
+                                 if (!jsonString) {
+                                     error "No valid JSON received!"
+                                 }
 
-                       // Extract parameters dynamically
-                       requestBody.parameter.each { param ->
-                           switch (param.name) {
-                               case 'CITY_NAME':
-                                   env.CITY_NAME = param.value
-                                   break
-                               case 'MulesoftEnv':
-                                   env.MULESOFT_ENV = param.value
-                                   break
-                               case 'Branch':
-                                   env.BRANCH = param.value
-                                   break
-                               case 'Suites':
-                                   env.SUITES = param.value
-                                   break
-                           }
-                       }
+                                 // Parse the JSON input
+                                 def jsonSlurper = new JsonSlurper()
+                                 def requestBody = jsonSlurper.parseText(jsonString)
 
-                       // Debugging: Print extracted values
-                       echo "Extracted Parameters:"
-                       echo "CITY_NAME: ${env.CITY_NAME}"
-                       echo "MULESOFT_ENV: ${env.MULESOFT_ENV}"
-                       echo "BRANCH: ${env.BRANCH}"
-                       echo "SUITES: ${env.SUITES}"
-                   }
-               }
-           }
+                                 // Validate JSON structure
+                                 if (!requestBody.containsKey('parameter') || !(requestBody.parameter instanceof List)) {
+                                     error "Invalid JSON structure: Missing 'parameter' array"
+                                 }
+
+                                 // Extract parameters dynamically
+                                 requestBody.parameter.each { param ->
+                                     switch (param.name) {
+                                         case 'CITY_NAME':
+                                             env.CITY_NAME = param.value
+                                             break
+                                         case 'MulesoftEnv':
+                                             env.MULESOFT_ENV = param.value
+                                             break
+                                         case 'Branch':
+                                             env.BRANCH = param.value
+                                             break
+                                         case 'Suites':
+                                             env.SUITES = param.value
+                                             break
+                                     }
+                                 }
+
+                                 // Debugging: Print extracted values
+                                 echo "Extracted Parameters:"
+                                 echo "CITY_NAME: ${env.CITY_NAME}"
+                                 echo "MULESOFT_ENV: ${env.MULESOFT_ENV}"
+                                 echo "BRANCH: ${env.BRANCH}"
+                                 echo "SUITES: ${env.SUITES}"
+                             }
+                         }
+                     }
 
 
 
