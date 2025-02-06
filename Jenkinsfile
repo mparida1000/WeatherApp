@@ -6,9 +6,9 @@ pipeline {
             BRANCH = ''
             SUITES = ''
         }
-    parameters {
-        string(name: 'CITY_NAME', defaultValue: 'London', description: 'Enter the city name')
-    }
+//     parameters {
+//         string(name: 'CITY_NAME', defaultValue: 'London', description: 'Enter the city name')
+//     }
     stages {
 
 
