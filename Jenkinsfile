@@ -1,3 +1,4 @@
+import groovy.json.JsonSlurper
 pipeline {
     agent any
     environment {
@@ -6,39 +7,59 @@ pipeline {
             BRANCH = ''
             SUITES = ''
         }
-//     parameters {
-//         string(name: 'CITY_NAME', defaultValue: 'London', description: 'Enter the city name')
-//     }
+parameters {
+        text(name: 'JSON_INPUT', defaultValue: '{"parameter":[]}', description: 'JSON Payload for Parameters')
+    }
     stages {
 
 
-    stage('Parse JSON Input') {
-                steps {
-                    script {
-                        // Read JSON input from params.JSON_INPUT
-                        def requestBody = readJSON text: params.JSON_INPUT
+   stage('Parse JSON Input') {
+               steps {
+                   script {
+                       // Debug: Print received JSON
+                       echo "Received JSON_INPUT: ${params.JSON_INPUT}"
 
-                        // Iterate through JSON parameters and assign values dynamically
-                        requestBody.parameter.each { param ->
-                            if (param.name == 'CITY_NAME') {
-                                env.CITY_NAME = param.value
-                            } else if (param.name == 'MulesoftEnv') {
-                                env.MULESOFT_ENV = param.value
-                            } else if (param.name == 'Branch') {
-                                env.BRANCH = param.value
-                            } else if (param.name == 'Suites') {
-                                env.SUITES = param.value
-                            }
-                        }
+                       // Ensure JSON_INPUT is not empty
+                       if (!params.JSON_INPUT?.trim()) {
+                           error "JSON_INPUT parameter is missing or empty!"
+                       }
 
-                        // Print extracted values for debugging
-                        echo "CITY_NAME: ${env.CITY_NAME}"
-                        echo "MulesoftEnv: ${env.MULESOFT_ENV}"
-                        echo "Branch: ${env.BRANCH}"
-                        echo "Suites: ${env.SUITES}"
-                    }
-                }
-            }
+                       // Parse the JSON input
+                       def jsonSlurper = new JsonSlurper()
+                       def requestBody = jsonSlurper.parseText(params.JSON_INPUT)
+
+                       // Validate JSON structure
+                       if (!requestBody.containsKey('parameter') || !(requestBody.parameter instanceof List)) {
+                           error "Invalid JSON structure: Missing 'parameter' array"
+                       }
+
+                       // Extract parameters dynamically
+                       requestBody.parameter.each { param ->
+                           switch (param.name) {
+                               case 'CITY_NAME':
+                                   env.CITY_NAME = param.value
+                                   break
+                               case 'MulesoftEnv':
+                                   env.MULESOFT_ENV = param.value
+                                   break
+                               case 'Branch':
+                                   env.BRANCH = param.value
+                                   break
+                               case 'Suites':
+                                   env.SUITES = param.value
+                                   break
+                           }
+                       }
+
+                       // Debugging: Print extracted values
+                       echo "Extracted Parameters:"
+                       echo "CITY_NAME: ${env.CITY_NAME}"
+                       echo "MULESOFT_ENV: ${env.MULESOFT_ENV}"
+                       echo "BRANCH: ${env.BRANCH}"
+                       echo "SUITES: ${env.SUITES}"
+                   }
+               }
+           }
 
 
 
