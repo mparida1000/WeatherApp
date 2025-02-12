@@ -21,7 +21,7 @@ pipeline {
         }
         stage('Run Java Program') {
             steps {
-                sh "mvn exec:java -Dexec.mainClass=com.example.WeatherCSVGenerator -Dexec.args='${CITY_NAME}'"
+                sh "mvn exec:java -Dexec.mainClass=com.example.WeatherCSVGenerator1 -Dexec.args='${CITY_NAME}'"
             }
         }
 
