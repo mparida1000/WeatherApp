@@ -11,7 +11,8 @@ pipeline {
         SF_SECURITY_TOKEN = credentials('sf-security-token')
         SF_CONSUMER_KEY = credentials('sf-consumer-key')
         SF_CONSUMER_SECRET = credentials('sf-consumer-secret')
-        SF_ENDPOINT = 'https://mlcg-dev-ed.my.salesforce.com/services/apexrest/jenkins/tests/webook'
+        SF_ENDPOINT = 'https://yourinstance.salesforce.com/services/apexrest/jenkins/tests/webook'
+        SF_LOGIN_URL = 'https://login.salesforce.com/services/oauth2/token'
     }
     stages {
         stage('Checkout') {
@@ -21,7 +22,7 @@ pipeline {
         }
         stage('Build') {
             steps {
-                sh 'mvn clean install' // Adjust path if needed
+                sh 'mvn clean install'
             }
         }
         stage('Check Class Files') {
@@ -31,7 +32,7 @@ pipeline {
         }
         stage('Run Java Program') {
             steps {
-                sh "mvn exec:java -Dexec.mainClass=com.example.WeatherCSVGenerator -Dexec.args='${CITY_NAME}'"
+                sh "mvn exec:java -Dexec.mainClass=com.example.WeatherCSVGenerator -Dexec.args='${params.CITY_NAME}'"
             }
         }
         stage('Archive CSV') {
@@ -49,32 +50,39 @@ pipeline {
                     BuildNumber: env.BUILD_NUMBER,
                     Status: currentBuild.currentResult
                 ]
-                
+
                 // Convert to JSON
                 def payloadJson = groovy.json.JsonOutput.toJson(payload)
-                
-                // Get Salesforce access token
-                def authResponse = httpRequest(
-                    acceptType: 'APPLICATION_JSON',
-                    contentType: 'APPLICATION_JSON',
-                    httpMode: 'POST',
-                    requestBody: "grant_type=password&client_id=${SF_CONSUMER_KEY}&client_secret=${SF_CONSUMER_SECRET}&username=${SF_USERNAME}&password=${SF_PASSWORD}${SF_SECURITY_TOKEN}",
-                    url: "https://login.salesforce.com/services/oauth2/token",
-                    quiet: true
-                )
-                
-                def authData = readJSON text: authResponse.content
-                def accessToken = authData.access_token
-                
-                // Send the webhook
-                httpRequest(
-                    acceptType: 'APPLICATION_JSON',
-                    contentType: 'APPLICATION_JSON',
-                    httpMode: 'POST',
-                    requestBody: payloadJson,
-                    url: SF_ENDPOINT,
-                    customHeaders: [[name: 'Authorization', value: "Bearer ${accessToken}"]]
-                )
+
+                try {
+                    // Get Salesforce access token
+                    def authResponse = httpRequest(
+                        acceptType: 'APPLICATION_JSON',
+                        contentType: 'APPLICATION_FORM',
+                        httpMode: 'POST',
+                        requestBody: "grant_type=password&client_id=${SF_CONSUMER_KEY}&client_secret=${SF_CONSUMER_SECRET}&username=${SF_USERNAME}&password=${SF_PASSWORD}${SF_SECURITY_TOKEN}",
+                        url: SF_LOGIN_URL,
+                        quiet: true
+                    )
+
+                    def authData = readJSON text: authResponse.content
+                    def accessToken = authData.access_token
+
+                    // Send the webhook
+                    httpRequest(
+                        acceptType: 'APPLICATION_JSON',
+                        contentType: 'APPLICATION_JSON',
+                        httpMode: 'POST',
+                        requestBody: payloadJson,
+                        url: SF_ENDPOINT,
+                        customHeaders: [[name: 'Authorization', value: "Bearer ${accessToken}"]],
+                        quiet: true
+                    )
+
+                    echo "Successfully sent build status to Salesforce"
+                } catch (Exception e) {
+                    echo "Failed to send build status to Salesforce: ${e.getMessage()}"
+                }
             }
         }
     }
