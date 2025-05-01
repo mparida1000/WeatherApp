@@ -11,7 +11,7 @@ pipeline {
         SF_SECURITY_TOKEN = credentials('sf-security-token')
         SF_CONSUMER_KEY = credentials('sf-consumer-key')
         SF_CONSUMER_SECRET = credentials('sf-consumer-secret')
-        SF_ENDPOINT = 'https://yourinstance.salesforce.com/services/apexrest/jenkins/tests/webook'
+        SF_ENDPOINT = 'https://mlcg-dev-ed.my.salesforce.com/services/apexrest/jenkins/tests/webook'
         SF_LOGIN_URL = 'https://login.salesforce.com/services/oauth2/token'
     }
     stages {
