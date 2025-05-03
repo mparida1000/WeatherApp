@@ -40,6 +40,15 @@ pipeline {
                 archiveArtifacts artifacts: 'weather_data.csv', fingerprint: true
             }
         }
+        stage('Setup Python') {
+            steps {
+                sh '''
+                    apt-get update -y
+                    apt-get install -y python3 python3-pip
+                    pip3 install requests
+                '''
+            }
+        }
     }
     post {
         always {
